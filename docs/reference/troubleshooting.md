@@ -194,7 +194,7 @@ Use `--follow` to stream logs in real time while debugging.
 
 If you see errors related to `xcrun` or missing headers during installation on macOS, ensure the Xcode Command Line Tools are correctly installed and configured:
 
-1.  **Install tools:** `xcode-select --install`
-2.  **Reset path:** `sudo xcode-select --reset`
+1. **Install tools:** `xcode-select --install`
+2. **Reset path:** `sudo xcode-select --reset`
 
 For a complete walkthrough, see the [macOS Installation Guide](../get-started/install-macos.md).

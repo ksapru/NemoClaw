@@ -63,10 +63,11 @@ Choose one of the supported runtimes. Docker Desktop is the most common choice.
 
 - **Docker Desktop:** Download from the [official site](https://www.docker.com/products/docker-desktop/), install, and **ensure the application is running**.
 - **Colima:** Install via Homebrew and start it:
+
   ```console
-$ brew install colima docker
-$ colima start
-```
+  $ brew install colima docker
+  $ colima start
+  ```
 
 ### 3. Verify Node.js
 
