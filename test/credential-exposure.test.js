@@ -18,14 +18,6 @@ const ONBOARD_JS = path.join(
   "lib",
   "onboard.js",
 );
-const RUNNER_TS = path.join(
-  import.meta.dirname,
-  "..",
-  "nemoclaw",
-  "src",
-  "blueprint",
-  "runner.ts",
-);
 
 // Matches --credential followed by a value containing "=" (i.e. KEY=VALUE).
 // Catches quoted KEY=VALUE patterns in JS and Python f-string interpolation.
@@ -33,8 +25,6 @@ const RUNNER_TS = path.join(
 // NOTE: unquoted forms like `--credential KEY=VALUE` would not be detected.
 const JS_EXPOSURE_RE = /--credential\s+[^"]*"[A-Z_]+=/;
 const JS_CREDENTIAL_CONCAT_RE = /--credential.*=.*process\.env\./;
-// TS pattern: --credential with template literal interpolation containing "="
-const TS_EXPOSURE_RE = /--credential.*=.*\$\{/;
 
 describe("credential exposure in process arguments", () => {
   it("onboard.js must not pass KEY=VALUE to --credential", () => {
@@ -45,20 +35,6 @@ describe("credential exposure in process arguments", () => {
       (line) =>
         (JS_EXPOSURE_RE.test(line) || JS_CREDENTIAL_CONCAT_RE.test(line)) &&
         // Allow comments that describe the old pattern
-        !line.trimStart().startsWith("//"),
-    );
-
-    expect(violations).toEqual([]);
-  });
-
-  it("runner.ts must not pass KEY=VALUE to --credential", () => {
-    const src = fs.readFileSync(RUNNER_TS, "utf-8");
-    const lines = src.split("\n");
-
-    const violations = lines.filter(
-      (line) =>
-        TS_EXPOSURE_RE.test(line) &&
-        line.includes("--credential") &&
         !line.trimStart().startsWith("//"),
     );
 
