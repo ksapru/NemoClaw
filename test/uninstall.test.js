@@ -76,7 +76,7 @@ describe("uninstall helpers", () => {
   it("returns the expected gateway volume candidate", () => {
     const result = spawnSync(
       "bash",
-      ["-lc", `source "${UNINSTALL_SCRIPT}"; gateway_volume_candidates nemoclaw`],
+      ["-c", `source "${UNINSTALL_SCRIPT}"; gateway_volume_candidates nemoclaw`],
       {
         cwd: path.join(import.meta.dirname, ".."),
         encoding: "utf-8",
@@ -99,7 +99,7 @@ describe("uninstall helpers", () => {
 
     const result = spawnSync(
       "bash",
-      ["-lc", `HOME="${tmp}" source "${UNINSTALL_SCRIPT}"; remove_nemoclaw_cli`],
+      ["-c", `HOME="${tmp}" source "${UNINSTALL_SCRIPT}"; remove_nemoclaw_cli`],
       {
         cwd: path.join(import.meta.dirname, ".."),
         encoding: "utf-8",
@@ -120,7 +120,7 @@ describe("uninstall helpers", () => {
 
     const result = spawnSync(
       "bash",
-      ["-lc", `HOME="${tmp}" source "${UNINSTALL_SCRIPT}"; remove_nemoclaw_cli`],
+      ["-c", `HOME="${tmp}" source "${UNINSTALL_SCRIPT}"; remove_nemoclaw_cli`],
       {
         cwd: path.join(import.meta.dirname, ".."),
         encoding: "utf-8",
@@ -142,7 +142,7 @@ describe("uninstall helpers", () => {
 
     const result = spawnSync(
       "bash",
-      ["-lc", `HOME="${tmp}" source "${UNINSTALL_SCRIPT}"; remove_nemoclaw_state`],
+      ["-c", `HOME="${tmp}" source "${UNINSTALL_SCRIPT}"; remove_nemoclaw_state`],
       {
         cwd: path.join(import.meta.dirname, ".."),
         encoding: "utf-8",

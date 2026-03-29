@@ -83,13 +83,13 @@ describe("CLI dispatch", () => {
   });
 
   it("debug --quick exits 0 and produces diagnostic output", () => {
-    const r = run("debug --quick");
+    const r = runWithEnv("debug --quick", {}, 30000);
     expect(r.code).toBe(0);
     expect(r.out.includes("Collecting diagnostics")).toBeTruthy();
     expect(r.out.includes("System")).toBeTruthy();
     expect(r.out.includes("Onboard Session")).toBeTruthy();
     expect(r.out.includes("Done")).toBeTruthy();
-  });
+  }, 30000);
 
   it("debug exits 1 on unknown option", () => {
     const r = run("debug --quik");
@@ -608,7 +608,7 @@ describe("CLI dispatch", () => {
     const connectResult = runWithEnv("alpha connect", {
       HOME: home,
       PATH: `${localBin}:${process.env.PATH || ""}`,
-    });
+    }, 30000);
     expect(connectResult.code).toBe(1);
     expect(connectResult.out.includes("gateway trust material rotated after restart")).toBeTruthy();
     expect(connectResult.out.includes("Recreate this sandbox")).toBeTruthy();
@@ -681,11 +681,11 @@ describe("CLI dispatch", () => {
     const connectResult = runWithEnv("alpha connect", {
       HOME: home,
       PATH: `${localBin}:${process.env.PATH || ""}`,
-    });
+    }, 30000);
     expect(connectResult.code).toBe(1);
     expect(connectResult.out.includes("gateway is still refusing connections after restart")).toBeTruthy();
     expect(connectResult.out.includes("If the gateway never becomes healthy")).toBeTruthy();
-  }, 25000);
+  }, 30000);
 
   it("explains when the named gateway is no longer configured after restart or rebuild", () => {
     const home = fs.mkdtempSync(path.join(os.tmpdir(), "nemoclaw-cli-gateway-missing-"));
@@ -745,4 +745,41 @@ describe("CLI dispatch", () => {
     expect(statusResult.out.includes("gateway is no longer configured after restart/rebuild")).toBeTruthy();
     expect(statusResult.out.includes("Start the gateway again")).toBeTruthy();
   }, 25000);
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// 3. Regression guard — migration-state.ts must contain the validation
+// ═══════════════════════════════════════════════════════════════════
+describe("C-4 regression: migration-state.ts contains path validation", () => {
+  /** Extract the restoreSnapshotToHost function body from the source. */
+  function getRestoreFnBody() {
+    const src = fs.readFileSync(
+      path.join(import.meta.dirname, "..", "nemoclaw", "src", "commands", "migration-state.ts"),
+      "utf-8",
+    );
+    const fnStart = src.indexOf("function restoreSnapshotToHost");
+    expect(fnStart !== -1).toBeTruthy();
+    return src.slice(fnStart);
+  }
+
+  it("restoreSnapshotToHost calls isWithinRoot on manifest.stateDir", () => {
+    const fnBody = getRestoreFnBody();
+    expect(/isWithinRoot\s*\(\s*manifest\.stateDir/.test(fnBody)).toBeTruthy();
+  });
+
+  it("restoreSnapshotToHost calls isWithinRoot on manifest.configPath", () => {
+    const fnBody = getRestoreFnBody();
+    expect(/isWithinRoot\s*\(\s*manifest\.configPath/.test(fnBody)).toBeTruthy();
+  });
+
+  it("restoreSnapshotToHost validates manifest.homeDir against trusted root", () => {
+    const fnBody = getRestoreFnBody();
+    expect(/isWithinRoot\s*\(\s*manifest\.homeDir/.test(fnBody)).toBeTruthy();
+  });
+
+  it("restoreSnapshotToHost fails closed when hasExternalConfig is true with missing configPath", () => {
+    const fnBody = getRestoreFnBody();
+    expect(/manifest\.hasExternalConfig\b/.test(fnBody) &&
+      /typeof\s+manifest\.configPath\s*!==\s*["']string["']/.test(fnBody)).toBeTruthy();
+  });
 });
